@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบสำหรับนักเรียน - วิทยาลัยอาชีวศึกษาชุมพร</title>
+    <!-- Favicon Icon -->
+    <link rel="icon" type="image/png" href="photo/icon1.png">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google API Client Libraries สำหรับ Google Picker -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <style>
+        * { box-sizing: border-box; font-family: 'Sarabun', sans-serif; margin: 0; padding: 0; }
+        body { background-color: #0d1b2a; color: #e0e6ed; padding: 20px; min-height: 100vh; }
+        
+        /* Clean iPhone/iOS Style Activity Indicator Spinner */
+        .ios-spinner {
+            position: relative;
+            width: 38px;
+            height: 38px;
+            display: inline-block;
+        }
+        .ios-spinner div {
+            position: absolute;
+            left: 46%;
+            top: 20%;
+            width: 8%;
+            height: 26%;
+            background: #ffffff;
+            border-radius: 50px;
+            opacity: 0.15;
+            animation: ios-spinner-fade 1s linear infinite;
+        }
+        .ios-spinner div:nth-child(1)  { transform: rotate(0deg) translate(0, -130%); animation-delay: 0s; }
+        .ios-spinner div:nth-child(2)  { transform: rotate(30deg) translate(0, -130%); animation-delay: -0.9167s; }
+        .ios-spinner div:nth-child(3)  { transform: rotate(60deg) translate(0, -130%); animation-delay: -0.8333s; }
+        .ios-spinner div:nth-child(4)  { transform: rotate(90deg) translate(0, -130%); animation-delay: -0.75s; }
+        .ios-spinner div:nth-child(5)  { transform: rotate(120deg) translate(0, -130%); animation-delay: -0.6667s; }
+        .ios-spinner div:nth-child(6)  { transform: rotate(150deg) translate(0, -130%); animation-delay: -0.5833s; }
+        .ios-spinner div:nth-child(7)  { transform: rotate(180deg) translate(0, -130%); animation-delay: -0.5s; }
+        .ios-spinner div:nth-child(8)  { transform: rotate(210deg) translate(0, -130%); animation-delay: -0.4167s; }
+        .ios-spinner div:nth-child(9)  { transform: rotate(240deg) translate(0, -130%); animation-delay: -0.3333s; }
+        .ios-spinner div:nth-child(10) { transform: rotate(270deg) translate(0, -130%); animation-delay: -0.25s; }
+        .ios-spinner div:nth-child(11) { transform: rotate(300deg) translate(0, -130%); animation-delay: -0.1667s; }
+        .ios-spinner div:nth-child(12) { transform: rotate(330deg) translate(0, -130%); animation-delay: -0.0833s; }
+
+        @keyframes ios-spinner-fade {
+            0% { opacity: 1; }
+            100% { opacity: 0.15; }
+        }
+
+        /* Fullscreen Overlay Style */
+        .loading-overlay-ios {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 11, 26, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+        .loading-box-ios {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            min-width: 160px;
+            gap: 12px;
+        }
+        .loading-box-ios span {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar { 
+            background: linear-gradient(135deg, #0f2b48 0%, #1a365d 100%); 
+            padding: 16px 24px; 
+            color: white; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
+            margin-bottom: 25px; 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .navbar h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 12px; color: #ffffff; }
+        .user-info { display: flex; align-items: center; gap: 20px; font-size: 14px; background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .user-info span { color: #ff9f43; font-weight: 600; }
+
+        .btn-home { 
+            background: rgba(255, 255, 255, 0.1); 
+            color: #ffffff; 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            padding: 8px 18px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.3s ease; 
+            text-decoration: none; 
+            display: inline-block; 
+            font-size: 14px;
+        }
+        .btn-home:hover { background: rgba(255, 255, 255, 0.25); transform: translateY(-2px); }
+
+        .btn-sidebar-toggle { 
+            background: #ff9f43; 
+            color: #0f2b48; 
+            border: none; 
+            padding: 8px 14px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 700; 
+            font-size: 15px; 
+            transition: all 0.2s ease; 
+        }
+        .btn-sidebar-toggle:hover { background: #f39c12; transform: scale(1.03); }
+
+        .main-container { 
+            background: #112233; 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            min-height: 450px; 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .main-container h2 { font-size: 22px; color: #ffffff; font-weight: 700; border-left: 4px solid #ff9f43; padding-left: 12px; }
+
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 22px; margin-top: 25px; }
+        
+        .task-card { 
+            background: #1b2e4b; 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 14px; 
+            overflow: hidden; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25); 
+            display: flex; 
+            flex-direction: column; 
+            transition: all 0.3s ease;
+        }
+        .task-card:hover { transform: translateY(-5px); border-color: rgba(255, 159, 67, 0.4); box-shadow: 0 12px 25px rgba(0,0,0,0.4); }
+        .card-img { width: 100%; height: 160px; object-fit: cover; background: #0f2b48; }
+        .card-body { padding: 18px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-subject { font-size: 12px; color: #ff9f43; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .card-title { font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 8px; line-height: 1.4; }
+        .card-desc { font-size: 14px; color: #a0aec0; margin-bottom: 16px; line-height: 1.6; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; }
+        
+        .btn-view { 
+            background: linear-gradient(135deg, #ff9f43 0%, #e67e22 100%); 
+            color: #0f2b48; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            width: 100%; 
+            text-align: center; 
+            font-size: 14px; 
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+        }
+        .btn-view:hover { background: linear-gradient(135deg, #f39c12 0%, #d35400 100%); color: #fff; transform: translateY(-1px); }
+
+        /* Style สำหรับ Slide Drawer เมนูด้านข้าง */
+        .sidebar-drawer { position: fixed; top: 0; left: -330px; width: 310px; height: 100%; background: #0f2b48; box-shadow: 8px 0 25px rgba(0,0,0,0.5); transition: left 0.3s ease; z-index: 3000; padding: 25px; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-drawer.open { left: 0; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; }
+        .sidebar-header h3 { font-size: 18px; color: #ffffff; font-weight: 700; }
+        .btn-close-sidebar { background: none; border: none; font-size: 22px; cursor: pointer; color: #a0aec0; font-weight: bold; transition: 0.2s; }
+        .btn-close-sidebar:hover { color: #ff4d4d; }
+
+        .sidebar-content { flex-grow: 1; }
+        .btn-gdrive-link { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; background: rgba(255, 255, 255, 0.08); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; text-decoration: none; }
+        .btn-gdrive-link:hover { background: #ff9f43; color: #0f2b48; border-color: #ff9f43; transform: translateY(-2px); }
+
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 2999; display: none; }
+        .sidebar-overlay.show { display: block; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+        .modal-box { background: #172a45; padding: 25px; border-radius: 16px; max-width: 600px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); color: #e0e6ed; }
+        
+        /* สไตล์โพสต์ Social Media ภายใน Modal นักเรียน (ปรับแก้รูปโปรไฟล์ครู) */
+        .social-post-preview { background: #1b2e4b; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 16px; color: #fff; margin-bottom: 20px; }
+        .social-post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .social-avatar { width: 38px; height: 38px; background: #ff9f43; border-radius: 50%; object-fit: cover; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #0f2b48; font-size: 14px; border: 1px solid rgba(255,255,255,0.2); }
+        .social-author-info { font-size: 13px; font-weight: bold; color: #fff; }
+        .social-time { font-size: 11px; color: #a0aec0; }
+        .social-text { font-size: 14px; line-height: 1.5; color: #e0e6ed; margin-bottom: 12px; word-break: break-word; white-space: pre-line; }
+        
+        .social-gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 12px; border-radius: 10px; overflow: hidden; }
+        .social-gallery-img { width: 100%; height: 130px; object-fit: cover; background: #0f2b48; border-radius: 6px; }
+
+        .card-link-box { margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
+        .card-link { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #ff9f43; background: rgba(255, 159, 67, 0.1); border: 1px solid rgba(255, 159, 67, 0.25); padding: 8px 12px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s ease; }
+        .card-link:hover { background: rgba(255, 159, 67, 0.2); color: #fff; transform: translateY(-1px); }
+        .card-no-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #ef4444; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 8px; font-weight: 600; }
+
+        /* Submit Area */
+        .submit-section { background: rgba(255,255,255,0.03); padding: 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 15px; }
+        .submit-section label { display: block; font-weight: 700; font-size: 14px; color: #ffffff; margin-bottom: 10px; }
+
+        .submit-input-group { margin-bottom: 12px; }
+        
+        .btn-drive-picker { background: #2b4c7e; color: white; border: 1px solid rgba(255,255,255,0.1); width: 100%; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 14px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-drive-picker:hover { background: #3b629b; }
+
+        .btn-submit-work { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 15px; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3); }
+        .btn-submit-work:hover { background: #27ae60; transform: translateY(-1px); }
+
+        .btn-close { display: block; width: 100%; padding: 12px; background: rgba(255,255,255,0.1); color: #cbd5e0; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .btn-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+        .hidden { display: none !important; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .popup { background: #172a45; padding: 30px; border-radius: 16px; text-align: center; max-width: 360px; width: 90%; border: 1px solid rgba(255,255,255,0.1); }
+        .popup h3 { color: #ff4d4d; margin-bottom: 15px; font-size: 22px; font-weight: 700; }
+        .popup p { color: #cbd5e0; }
+        .popup button { background: #ff4d4d; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 700; margin-top: 18px; transition: 0.2s; }
+        .popup button:hover { background: #e03838; }
+    </style>
+</head>
+<body>
+
+    <!-- iOS Style Loading Overlay -->
+    <div id="pageLoadingOverlay" class="loading-overlay-ios">
+        <div class="loading-box-ios">
+            <div class="ios-spinner">
+                <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+            </div>
+            <span>กำลังโหลดข้อมูล...</span>
+        </div>
+    </div>
+
+    <div id="auth-alert" class="overlay hidden">
+        <div class="popup">
+            <h3>ปฏิเสธการเข้าถึง!</h3>
+            <p>กรุณาเข้าสู่ระบบนักเรียนก่อนใช้งานค่ะ</p>
+            <button onclick="window.location.href='index.html'">ไปหน้าหลัก</button>
+        </div>
+    </div>
+
+    <!-- Background Overlay สำหรับสไลด์เมนู -->
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar Drawer เมนูด้านข้างนักเรียน -->
+    <div id="sidebar-drawer" class="sidebar-drawer">
+        <div class="sidebar-header">
+            <h3>📂 เมนูส่วนตัว</h3>
+            <button class="btn-close-sidebar" onclick="closeSidebar()">✕</button>
+        </div>
+        <div class="sidebar-content">
+            <a id="gdrive-user-link" href="https://drive.google.com" target="_blank" class="btn-gdrive-link">
+                <span style="font-size: 20px;">📁</span> Google Drive ของฉัน
+            </a>
+            <p style="font-size: 12px; color: #a0aec0; margin-top: 12px; line-height: 1.5;">*ระบบจะล็อกเปิดเฉพาะ Google Drive บัญชี Gmail ของคุณล่วงหน้าให้อัตโนมัติ*</p>
+        </div>
+    </div>
+
+    <div id="student-content" class="hidden">
+        <nav class="navbar">
+            <h1>
+                <button class="btn-sidebar-toggle" onclick="openSidebar()">☰ เมนู</button>
+                ระบบนักเรียน (Student Portal)
+            </h1>
+            <div class="user-info">
+                <div>
+                    <strong>ผู้ใช้งาน:</strong> <span id="display-name">-</span> | 
+                    <strong>ชั้น/ห้อง:</strong> <span id="display-class">-</span> | 
+                    <strong>รหัส/เลขที่:</strong> <span id="display-no">-</span>
+                </div>
+                <button class="btn-home" onclick="goHome()">กลับไปหน้าหลัก</button>
+            </div>
+        </nav>
+
+        <main class="main-container">
+            <h2>กล่องงานและกิจกรรมที่ได้รับมอบหมาย</h2>
+            <hr style="margin: 18px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.08);">
+            
+            <div id="student-cards-container" class="cards-grid"></div>
+        </main>
+    </div>
+
+    <!-- Modal แสดงรายละเอียดงานสไตล์ Social Post -->
+    <div id="detail-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <!-- ส่วนโพสต์สไตล์ Social Media -->
+            <div class="social-post-preview">
+                <div class="social-post-header">
+                    <!-- เปลี่ยนเป็นรูปโปรไฟล์จริงจากบัญชีครูที่สร้าง -->
+                    <img id="modal-teacher-avatar-img" class="social-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop" alt="Teacher Avatar">
+                    <div>
+                        <div id="modal-social-subject" class="social-author-info">ชื่อวิชา</div>
+                        <div class="social-time">โพสต์โดยครูผู้สอน • 🌍 สาธารณะ</div>
+                    </div>
+                </div>
+                <h3 id="modal-social-title" style="font-size: 16px; font-weight: bold; margin-bottom: 8px; color: #ff9f43;">หัวข้อเรื่อง / ชื่องาน</h3>
+                <div id="modal-social-desc" class="social-text">รายละเอียดงานทั้งหมดจะแสดงที่นี่...</div>
+                
+                <!-- แกลเลอรีรูปภาพประกอบ -->
+                <div id="modal-social-gallery" class="social-gallery-grid">
+                    <span style="font-size: 11px; color: #a0aec0; grid-column: 1/-1;">ยังไม่มีรูปภาพประกอบ</span>
+                </div>
+
+                <!-- ลิงก์ดาวน์โหลดงาน PDF -->
+                <div id="modal-social-downloads" class="card-link-box" style="margin-top: 10px;">
+                    <span class="card-no-link" style="font-size: 11px; padding: 6px 10px;">⚠️ ยังไม่ได้แนบลิงก์ดาวน์โหลดงาน</span>
+                </div>
+            </div>
+            
+            <!-- ส่วนส่งงานแบบ Google Drive -->
+            <div class="submit-section">
+                <label>🧙‍♂️ รูปแบบการส่งงาน:</label>
+
+                <div class="submit-input-group">
+                    <button type="button" class="btn-drive-picker" onclick="openGoogleDrivePicker()">
+                        <span>📂 ไปยัง Google Drive ของฉันเพื่อเลือกไฟล์</span>
+                    </button>
+                    <input type="url" id="selected-drive-file" placeholder="วางลิงก์ไฟล์ที่คัดลอกจาก Google Drive ที่นี่..." style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; font-size: 14px; background: rgba(0,0,0,0.3); color: #fff; outline: none;">
+                </div>
+
+                <button class="btn-submit-work" onclick="submitWork()">📤 ยืนยันการส่งงาน</button>
+            </div>
+
+            <button class="btn-close" onclick="closeDetailModal()">ปิดหน้าต่างนี้</button>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = "https://script.google.com/macros/s/AKfycbyBHU2Aw_fpj0K6RhjcH7DIIwwtJIr3Bb1QQW3aUUjM9qMapXMUKvh6KkZhfvoIUXOg/exec";
+
+        let globalTasks = [];
+        let studentClass = ""; 
+        let studentName = "";
+        let studentCode = "";
+        let studentEmail = "";
+        let studentNo = "";
+        let currentTask = null;
+        let lastTaskHash = "";
+
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('pageLoadingOverlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        function openSidebar() {
+            document.getElementById('sidebar-drawer').classList.add('open');
+            document.getElementById('sidebar-overlay').classList.add('show');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar-drawer').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('show');
+        }
+
+        function cleanClassName(str) {
+            if (!str) return "";
+            return str.replace(/\./g, "").replace(/\s+/g, "").trim();
+        }
+
+        async function checkAuth() {
+            const sessionData = sessionStorage.getItem("loggedInUser");
+
+            if (!sessionData) {
+                hideLoadingOverlay();
+                document.getElementById('auth-alert').classList.remove('hidden');
+                document.getElementById('student-content').classList.add('hidden');
+            } else {
+                const loggedInUser = JSON.parse(sessionData);
+                studentClass = loggedInUser.className || loggedInUser.classroom || loggedInUser.studentLevel || loggedInUser.level || ""; 
+                studentName = loggedInUser.fullName || loggedInUser.name || "-";
+                studentCode = loggedInUser.studentCode || loggedInUser.userCode || loggedInUser.studentId || "";
+                studentEmail = loggedInUser.email || "";
+                studentNo = loggedInUser.no || loggedInUser.studentNo || "";
+
+                document.getElementById('display-name').innerText = studentName;
+                document.getElementById('display-class').innerText = studentClass || "-";
+                document.getElementById('display-no').innerText = `${studentCode || studentEmail} ${studentNo ? '/ เลขที่ ' + studentNo : ''}`;
+                
+                const driveBtn = document.getElementById('gdrive-user-link');
+                if (studentEmail && studentEmail.includes('@')) {
+                    driveBtn.href = `https://drive.google.com/drive/u/0/?authuser=${encodeURIComponent(studentEmail)}`;
+                } else {
+                    driveBtn.href = "https://drive.google.com";
+                }
+
+                document.getElementById('student-content').classList.remove('hidden');
+                
+                const cachedTasks = localStorage.getItem("cached_student_tasks");
+                if (cachedTasks) {
+                    try {
+                        globalTasks = JSON.parse(cachedTasks);
+                        lastTaskHash = cachedTasks;
+                        renderStudentCards();
+                    } catch(e) {}
+                }
+
+                try {
+                    await fetchTasksRealtime();
+                } catch(e) {
+                } finally {
+                    hideLoadingOverlay();
+                }
+            }
+        }
+
+        async function fetchTasksRealtime() {
+            try {
+                const res = await fetch(`${BACKEND_URL}?action=get_tasks&t=${new Date().getTime()}`);
+                const data = await res.json();
+                if (data && data.tasks) {
+                    const newTasksStr = JSON.stringify(data.tasks);
+                    if (lastTaskHash !== newTasksStr) {
+                        globalTasks = data.tasks;
+                        lastTaskHash = newTasksStr;
+                        localStorage.setItem("cached_student_tasks", newTasksStr);
+                        renderStudentCards();
+                    }
+                }
+            } catch(e) {}
+        }
+
+        function renderStudentCards() {
+            const container = document.getElementById('student-cards-container');
+            const studentClean = cleanClassName(studentClass);
+
+            const myTasks = globalTasks.filter(task => {
+                if (!task.sharedClasses) return false;
+                return task.sharedClasses.some(sharedRoom => cleanClassName(sharedRoom) === studentClean);
+            });
+
+            if(myTasks.length === 0) {
+                container.innerHTML = `<p style="color:#a0aec0; grid-column: 1/-1; text-align:center; padding: 50px 0; font-size: 15px;">ขณะนี้ยังไม่มีชิ้นงานแชร์ส่งถึงระดับชั้นของคุณ (${studentClass}) ค่ะ 😊</p>`;
+                return;
+            }
+
+            let cardsHtml = "";
+            myTasks.forEach((task) => {
+                const defaultImg = "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600&auto=format&fit=crop";
+                cardsHtml += `
+                    <div class="task-card">
+                        <img class="card-img" src="${task.image || defaultImg}" alt="Cover Image" loading="lazy">
+                        <div class="card-body">
+                            <div class="card-subject">${task.subject}</div>
+                            <div class="card-title">${task.title}</div>
+                            <div style="font-size: 12px; color: #a0aec0; margin-bottom: 8px; font-style: italic;">
+                                ผู้มอบหมาย: ครู${task.teacherName || 'ประจำวิชา'}
+                            </div>
+                            <div class="card-desc">${task.desc || 'ไม่มีรายละเอียดเพิ่มเติม'}</div>
+                            <button class="btn-view" onclick='openDetailModal(${JSON.stringify(task).replace(/'/g, "&#39;")})'>🔎 ดูรายละเอียดงาน / ส่งงาน</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = cardsHtml;
+        }
+
+        async function openDetailModal(task) {
+            currentTask = task;
+            document.getElementById('modal-social-subject').innerText = task.subject || "ชื่อวิชา";
+            document.getElementById('modal-social-title').innerText = task.title || "หัวข้อเรื่อง / ชื่องาน";
+            document.getElementById('modal-social-desc').innerText = task.desc || "รายละเอียดงานทั้งหมดจะแสดงที่นี่...";
+
+            // ดึงข้อมูลรูปโปรไฟล์จริง (avatar) จาก Google Sheet (ตาราง Teachers) ของครูผู้สร้างงาน
+            let teacherAvatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop";
+            if (task.teacherUser) {
+                try {
+                    const res = await fetch(`${BACKEND_URL}?action=get_user_profile&role=teacher&identifier=${encodeURIComponent(task.teacherUser)}&t=${new Date().getTime()}`);
+                    const data = await res.json();
+                    if (data && data.status === 'success' && data.user && data.user.avatar) {
+                        teacherAvatarUrl = data.user.avatar;
+                    }
+                } catch(e) {}
+            }
+            document.getElementById('modal-teacher-avatar-img').src = teacherAvatarUrl;
+
+            const socialGallery = document.getElementById('modal-social-gallery');
+            socialGallery.innerHTML = "";
+            if (task.galleryImages) {
+                const imgList = task.galleryImages.split(',').map(s => s.trim()).filter(Boolean);
+                if (imgList.length > 0) {
+                    imgList.forEach(imgB64 => {
+                        socialGallery.innerHTML += `<img class="social-gallery-img" src="${imgB64}" alt="Gallery">`;
+                    });
+                }
+            }
+            if (socialGallery.innerHTML === "") {
+                socialGallery.innerHTML = `<span style="font-size: 11px; color: #a0aec0; grid-column: 1/-1;">ยังไม่มีรูปภาพประกอบ</span>`;
+            }
+
+            const socialDownloadContainer = document.getElementById('modal-social-downloads');
+            socialDownloadContainer.innerHTML = "";
+            if (task.downloadLinks) {
+                const dlLinks = task.downloadLinks.split(',').map(s => s.trim()).filter(Boolean);
+                if (dlLinks.length > 0) {
+                    dlLinks.forEach((l, i) => {
+                        socialDownloadContainer.innerHTML += `<a class="card-link" href="${l}" target="_blank" style="font-size: 11px; padding: 6px 10px;">📥 ดาวน์โหลดงาน PDF ที่ ${i + 1}</a>`;
+                    });
+                }
+            }
+            if (socialDownloadContainer.innerHTML === "") {
+                socialDownloadContainer.innerHTML = `<span class="card-no-link" style="font-size: 11px; padding: 6px 10px;">⚠️ ยังไม่ได้แนบลิงก์ดาวน์โหลดงาน</span>`;
+            }
+
+            document.getElementById('selected-drive-file').value = "";
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        function openGoogleDrivePicker() {
+            let driveUrl = "https://drive.google.com";
+            if (studentEmail && studentEmail.includes('@')) {
+                driveUrl = `https://drive.google.com/drive/u/0/?authuser=${encodeURIComponent(studentEmail)}`;
+            }
+            window.open(driveUrl, '_blank');
+        }
+
+        async function submitWork() {
+            if (!currentTask || !currentTask.link) {
+                alert("งานชิ้นนี้ครูผู้สอนยังไม่ได้แนบลิงก์ Google Sheet สำหรับรับงานค่ะ");
+                return;
+            }
+
+            const driveInputUrl = document.getElementById('selected-drive-file').value.trim();
+            if (!driveInputUrl) {
+                alert("กรุณาวางลิงก์ไฟล์งานที่คัดลอกจาก Google Drive ของคุณก่อนค่ะ");
+                return;
+            }
+
+            const btn = document.querySelector('.btn-submit-work');
+            let payload = {
+                action: 'submit_work',
+                sheetUrl: currentTask.link,
+                studentCode: studentCode,
+                studentName: studentName,
+                studentClass: studentClass,
+                studentNo: studentNo,
+                studentEmail: studentEmail,
+                submitType: 'file',
+                workData: driveInputUrl,
+                fileName: "ไฟล์จาก Google Drive"
+            };
+
+            try {
+                btn.disabled = true;
+                btn.innerText = "⏳ กำลังบันทึกข้อมูลลง Google Sheet...";
+
+                await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
+
+                alert("ส่งงานเรียบร้อยแล้วค่ะ! ลิงก์ไฟล์ Google Drive ของคุณถูกบันทึกลงใน Google Sheet ของครูแล้ว");
+                btn.disabled = false;
+                btn.innerText = "📤 ยืนยันการส่งงาน";
+                closeDetailModal();
+            } catch(e) {
+                alert("เกิดข้อผิดพลาดในการส่งงาน กรุณาลองใหม่อีกครั้ง");
+                btn.disabled = false;
+                btn.innerText = "📤 ยืนยันการส่งงาน";
+            }
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        function goHome() {
+            window.location.href = "index.html";
+        }
+
+        window.onload = () => {
+            checkAuth();
+            setInterval(fetchTasksRealtime, 5000);
+        };
+    </script>
+</body>
+</html>

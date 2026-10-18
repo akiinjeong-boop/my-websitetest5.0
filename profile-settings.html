@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตั้งค่าโปรไฟล์ | ระบบส่งงานและสั่งงานออนไลน์</title>
+    <!-- Favicon Icon -->
+    <link rel="icon" type="image/png" href="photo/icon1.png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            800: '#0F172A',
+                            900: '#0B132B',
+                            950: '#050B1A',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0B132B 0%, #1C2541 50%, #3A506B 100%);
+        }
+
+        /* Clean iPhone/iOS Style Activity Indicator Spinner */
+        .ios-spinner {
+            position: relative;
+            width: 38px;
+            height: 38px;
+            display: inline-block;
+        }
+        .ios-spinner div {
+            position: absolute;
+            left: 46%;
+            top: 20%;
+            width: 8%;
+            height: 26%;
+            background: #ffffff;
+            border-radius: 50px;
+            opacity: 0.15;
+            animation: ios-spinner-fade 1s linear infinite;
+        }
+        .ios-spinner div:nth-child(1)  { transform: rotate(0deg) translate(0, -130%); animation-delay: 0s; }
+        .ios-spinner div:nth-child(2)  { transform: rotate(30deg) translate(0, -130%); animation-delay: -0.9167s; }
+        .ios-spinner div:nth-child(3)  { transform: rotate(60deg) translate(0, -130%); animation-delay: -0.8333s; }
+        .ios-spinner div:nth-child(4)  { transform: rotate(90deg) translate(0, -130%); animation-delay: -0.75s; }
+        .ios-spinner div:nth-child(5)  { transform: rotate(120deg) translate(0, -130%); animation-delay: -0.6667s; }
+        .ios-spinner div:nth-child(6)  { transform: rotate(150deg) translate(0, -130%); animation-delay: -0.5833s; }
+        .ios-spinner div:nth-child(7)  { transform: rotate(180deg) translate(0, -130%); animation-delay: -0.5s; }
+        .ios-spinner div:nth-child(8)  { transform: rotate(210deg) translate(0, -130%); animation-delay: -0.4167s; }
+        .ios-spinner div:nth-child(9)  { transform: rotate(240deg) translate(0, -130%); animation-delay: -0.3333s; }
+        .ios-spinner div:nth-child(10) { transform: rotate(270deg) translate(0, -130%); animation-delay: -0.25s; }
+        .ios-spinner div:nth-child(11) { transform: rotate(300deg) translate(0, -130%); animation-delay: -0.1667s; }
+        .ios-spinner div:nth-child(12) { transform: rotate(330deg) translate(0, -130%); animation-delay: -0.0833s; }
+
+        @keyframes ios-spinner-fade {
+            0% { opacity: 1; }
+            100% { opacity: 0.15; }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4 sm:p-6 text-slate-800">
+
+    <!-- iOS Style Loading Overlay -->
+    <div id="pageLoadingOverlay" class="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
+        <div class="bg-slate-900/80 border border-white/10 p-6 rounded-3xl flex flex-col items-center justify-center shadow-2xl backdrop-blur-xl space-y-3 min-w-[160px]">
+            <div class="ios-spinner">
+                <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+            </div>
+            <span class="text-white/90 text-xs font-medium tracking-wide">กำลังโหลดข้อมูล...</span>
+        </div>
+    </div>
+
+    <!-- Modal ป้องกันกรณีไม่ได้เข้าสู่ระบบ -->
+    <div id="authAlert" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">เข้าถึงถูกปฏิเสธ!</h3>
+            <p class="text-slate-600 text-sm mb-6">กรุณาเข้าสู่ระบบก่อนทำการดูข้อมูลส่วนตัว</p>
+            <a href="login.html" class="block w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl transition-colors">
+                ไปหน้าเข้าสู่ระบบ
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal หน้าต่างลอยสำหรับแก้ไขข้อมูล -->
+    <div id="editModal" class="hidden fixed inset-0 bg-slate-900/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 sticky top-0 bg-white z-10">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-blue-900"></i> แก้ไขข้อมูลโปรไฟล์
+                </h3>
+                <button type="button" onclick="closeEditModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- ระดับชั้น (แสดงเฉพาะนักเรียน) -->
+                <div id="modalClassContainer">
+                    <label for="editUserClass" class="block text-sm font-semibold text-slate-700 mb-1">
+                        ระดับชั้น / ห้องเรียน
+                    </label>
+                    <div class="relative">
+                        <i class="fa-solid fa-layer-group absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="editUserClass" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-900 focus:ring-2 focus:ring-blue-900/20 text-slate-800 text-sm outline-none transition-all">
+                    </div>
+                </div>
+
+                <!-- แผนกวิชา (แสดงเฉพาะนักเรียน) -->
+                <div id="modalDeptContainer">
+                    <label for="editUserDept" class="block text-sm font-semibold text-slate-700 mb-1">
+                        แผนกวิชา
+                    </label>
+                    <div class="relative">
+                        <i class="fa-solid fa-building-columns absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="editUserDept" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-900 focus:ring-2 focus:ring-blue-900/20 text-slate-800 text-sm outline-none transition-all">
+                    </div>
+                </div>
+
+                <!-- จังหวัด -->
+                <div>
+                    <label for="editProvinceDisplay" class="block text-sm font-semibold text-slate-700 mb-1">
+                        จังหวัด
+                    </label>
+                    <div class="relative">
+                        <i class="fa-solid fa-map-location-dot absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="editProvinceDisplay" list="provinceOptions" oninput="onProvinceChange()" placeholder="พิมพ์หรือเลือกจังหวัด..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-900 focus:ring-2 focus:ring-blue-900/20 text-slate-800 text-sm outline-none transition-all">
+                        <datalist id="provinceOptions"></datalist>
+                    </div>
+                </div>
+
+                <!-- สถาบัน / สถานศึกษา -->
+                <div>
+                    <label for="editInstitutionDisplay" class="block text-sm font-semibold text-slate-700 mb-1">
+                        สถาบัน / สถานศึกษา
+                    </label>
+                    <div class="relative">
+                        <i class="fa-solid fa-school absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="editInstitutionDisplay" list="institutionOptions" placeholder="พิมพ์หรือเลือกโรงเรียน..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:border-blue-900 focus:ring-2 focus:ring-blue-900/20 text-slate-800 text-sm outline-none transition-all">
+                        <datalist id="institutionOptions"></datalist>
+                    </div>
+                </div>
+
+                <hr class="border-slate-100 my-2">
+
+                <!-- ส่วนเปลี่ยน Gmail ใน Modal -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">อีเมล (Gmail)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="modalEmailDisplay" disabled class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm">
+                        <button type="button" onclick="openSecureSubModal('email')" class="px-4 py-2.5 bg-blue-900 hover:bg-blue-950 text-white text-xs font-semibold rounded-xl whitespace-nowrap transition-colors">
+                            เปลี่ยนเมล
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ส่วนเปลี่ยนรหัสผ่านใน Modal -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">รหัสผ่านบัญชี</label>
+                    <div class="flex gap-2">
+                        <input type="password" value="********" disabled class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm">
+                        <button type="button" onclick="openSecureSubModal('password')" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-xl whitespace-nowrap transition-colors">
+                            เปลี่ยนรหัสผ่าน
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6 pt-4 border-t border-slate-100">
+                <button type="button" onclick="closeEditModal()" class="flex-1 py-3 rounded-xl border border-slate-300 text-slate-600 font-medium text-sm hover:bg-slate-50 transition-colors">
+                    ยกเลิก
+                </button>
+                <button type="button" id="confirmSaveEditBtn" onclick="submitModalEdit(event)" class="flex-1 py-3 rounded-xl bg-blue-900 hover:bg-blue-950 text-white font-semibold text-sm shadow-md transition-colors">
+                    บันทึกการแก้ไข
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sub-Modal ยืนยันรหัสผ่านเพื่อเปลี่ยนเมล หรือ รหัสผ่าน -->
+    <div id="secureSubModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-slate-100 relative">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                <h4 id="secureSubTitle" class="text-base font-bold text-slate-900">ยืนยันความปลอดภัย</h4>
+                <button type="button" onclick="closeSecureSubModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Step 1: ใส่รหัสผ่านเดิม -->
+            <div id="subStep1" class="space-y-3">
+                <p id="subStep1Desc" class="text-xs text-slate-500">กรุณากรอกรหัสผ่านปัจจุบัน</p>
+                <input type="password" id="subCurrentPassword" placeholder="รหัสผ่านปัจจุบัน" class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm outline-none focus:border-blue-900">
+                <button type="button" onclick="verifySubPassword()" class="w-full py-2.5 bg-blue-900 text-white text-sm font-semibold rounded-xl">ถัดไป</button>
+            </div>
+
+            <!-- Step 2: กรอกข้อมูลใหม่ -->
+            <div id="subStep2" class="hidden space-y-3">
+                <div id="subEmailContainer" class="hidden space-y-2">
+                    <p class="text-xs text-slate-500">กรอกอีเมลใหม่</p>
+                    <input type="email" id="subNewEmail" placeholder="example@gmail.com" class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm outline-none focus:border-blue-900">
+                </div>
+                <div id="subPasswordContainer" class="hidden space-y-2">
+                    <p class="text-xs text-slate-500">กรอกรหัสผ่านใหม่ 2 ครั้งเพื่อยืนยัน</p>
+                    <input type="password" id="subNewPass1" placeholder="รหัสผ่านใหม่" class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm outline-none focus:border-blue-900">
+                    <input type="password" id="subNewPass2" placeholder="ยืนยันรหัสผ่านใหม่" class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm outline-none focus:border-blue-900">
+                </div>
+                <button type="button" id="subSubmitBtn" onclick="submitSecureChange()" class="w-full py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl">ยืนยันการเปลี่ยน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ยืนยันการลบบัญชีผู้ใช้ -->
+    <div id="deleteAccountModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-slate-100 relative">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                <h4 id="deleteModalTitle" class="text-base font-bold text-rose-600 flex items-center gap-2">
+                    <i class="fa-solid fa-user-slash"></i> ลบบัญชีผู้ใช้งาน
+                </h4>
+                <button type="button" onclick="closeDeleteModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Step 1: ใส่ Gmail -->
+            <div id="delStep1" class="space-y-3">
+                <p class="text-xs text-slate-500">กรุณากรอกอีเมล (Gmail) ของบัญชีที่ต้องการลบ</p>
+                <input type="email" id="delInputEmail" placeholder="example@gmail.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-rose-600">
+                <button type="button" onclick="nextDeleteStep1()" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-xl transition-colors">ตกลง</button>
+            </div>
+
+            <!-- Step 2: ใส่ Password -->
+            <div id="delStep2" class="hidden space-y-3">
+                <p class="text-xs text-slate-500">กรุณากรอกรหัสผ่านของคุณเพื่อยืนยันตัวตน</p>
+                <input type="password" id="delInputPassword" placeholder="รหัสผ่านบัญชี" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-rose-600">
+                <button type="button" onclick="nextDeleteStep2()" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-xl transition-colors">ถัดไป</button>
+            </div>
+
+            <!-- Step 3: ยืนยันขั้นสุดท้าย -->
+            <div id="delStep3" class="hidden space-y-4 text-center">
+                <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-2xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h5 class="text-sm font-bold text-slate-900">คุณจะลบบัญชีนี้ออกจากระบบจริงไหม?</h5>
+                    <p class="text-xs text-slate-500 mt-1">การดำเนินการนี้จะลบข้อมูลทั้งหมดในระบบโดยสมบูรณ์และไม่สามารถกู้คืนได้</p>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2.5 rounded-xl border border-slate-300 text-slate-600 text-xs font-semibold hover:bg-slate-50">ยกเลิก</button>
+                    <button type="button" onclick="confirmDeleteAccount()" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition-colors">ยืนยันการลบ</button>
+                </div>
+            </div>
+
+            <!-- Step 4: อนิเมชั่นกำลังลบและติ๊กถูก -->
+            <div id="delStep4" class="hidden py-6 text-center space-y-4">
+                <div id="delSpinnerContainer" class="flex flex-col items-center justify-center space-y-3">
+                    <div class="ios-spinner !w-10 !h-10">
+                        <div class="!bg-rose-600"></div><div class="!bg-rose-600"></div><div class="!bg-rose-600"></div><div class="!bg-rose-600"></div><div class="!bg-rose-600"></div><div class="!bg-rose-600"></div><div class="!bg-rose-600"></div><div class="!bg-rose-600"></div><div class="!bg-rose-600"></div><div class="!bg-rose-600"></div><div class="!bg-rose-600"></div><div class="!bg-rose-600"></div>
+                    </div>
+                    <span class="text-xs font-medium text-slate-600">กำลังลบข้อมูลบัญชีออกจากฐานข้อมูล...</span>
+                </div>
+                <div id="delSuccessContainer" class="hidden flex-col items-center justify-center space-y-2">
+                    <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl animate-bounce">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <span class="text-sm font-bold text-emerald-600">ลบบัญชีสำเร็จแล้ว</span>
+                    <p class="text-xs text-slate-400">ระบบกำลังนำท่านกลับสู่หน้าหลัก...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsContainer" class="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden my-8 border border-white/20">
+        
+        <!-- Header -->
+        <div class="bg-slate-900 text-white p-6 sm:p-8 text-center relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-amber-500/10 rounded-full blur-2xl"></div>
+            <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl"></div>
+            
+            <div class="relative z-10">
+                <a href="index.html" class="inline-flex items-center gap-2 text-slate-400 hover:text-amber-400 text-xs font-medium mb-4 transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i> ย้อนกลับไปหน้าหลัก
+                </a>
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center text-slate-950 font-bold mx-auto mb-3 shadow-lg">
+                    <i class="fa-solid fa-user-gear text-3xl"></i>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold">ข้อมูลส่วนตัวผู้ใช้งาน</h2>
+                <p class="text-slate-400 text-xs sm:text-sm mt-1">แสดงข้อมูลจากฐานข้อมูล Google Sheets และจัดการรูปโปรไฟล์ของคุณ</p>
+            </div>
+        </div>
+
+        <!-- Profile Form -->
+        <form id="profileForm" onsubmit="handleSaveProfile(event)" class="p-6 sm:p-8 space-y-6">
+            
+            <!-- Profile Avatar Preview & Upload -->
+            <div class="flex flex-col items-center justify-center gap-4 border-b border-slate-100 pb-6">
+                <div class="relative group">
+                    <img id="avatarPreview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=250&auto=format&fit=crop" alt="Profile Preview" class="w-28 h-28 rounded-full object-cover border-4 border-amber-400 shadow-xl">
+                    <label for="avatarFile" class="absolute bottom-0 right-0 w-9 h-9 bg-blue-900 hover:bg-blue-950 text-amber-400 rounded-full flex items-center justify-center cursor-pointer shadow-md transition-transform group-hover:scale-110">
+                        <i class="fa-solid fa-camera text-sm"></i>
+                    </label>
+                    <input type="file" id="avatarFile" accept="image/*" class="hidden" onchange="previewSelectedImage(event)">
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-slate-500">คลิกไอคอนกล้องเพื่อเปลี่ยนรูปโปรไฟล์ใหม่</p>
+                    <span id="roleBadge" class="inline-block mt-2 text-xs font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-900 border border-blue-200">
+                        สถานะ: ผู้ใช้งานระบบ
+                    </span>
+                </div>
+            </div>
+
+            <!-- Full Name Input (Readonly) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="firstname" class="block text-sm font-semibold text-slate-700 mb-1">ชื่อจริง</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="firstname" disabled class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed">
+                    </div>
+                </div>
+                <div>
+                    <label for="lastname" class="block text-sm font-semibold text-slate-700 mb-1">นามสกุล</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="lastname" disabled class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student ID & Email Fields -->
+            <div id="userGridContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div id="studentCodeContainer">
+                    <label id="userCodeLabel" for="userCodeDisplay" class="block text-sm font-semibold text-slate-700 mb-1">รหัสนักเรียน</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-id-card absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="userCodeDisplay" disabled class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed">
+                    </div>
+                </div>
+
+                <div id="emailContainer">
+                    <label for="userEmailDisplay" class="block text-sm font-semibold text-slate-700 mb-1">อีเมล (Gmail)</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="userEmailDisplay" disabled class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class / Level Field (Readonly) -->
+            <div id="classFieldContainer">
+                <label for="userClass" class="block text-sm font-semibold text-slate-700 mb-1">ระดับชั้น / ห้องเรียน</label>
+                <div class="relative">
+                    <i class="fa-solid fa-layer-group absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    <input type="text" id="userClass" disabled class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed">
+                </div>
+            </div>
+
+            <!-- Department Field (Readonly) -->
+            <div id="deptFieldContainer">
+                <label for="userDept" class="block text-sm font-semibold text-slate-700 mb-1">แผนกวิชา</label>
+                <div class="relative">
+                    <i class="fa-solid fa-building-columns absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    <input type="text" id="userDept" disabled class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed">
+                </div>
+            </div>
+
+            <!-- Province (Readonly) -->
+            <div>
+                <label for="provinceDisplay" class="block text-sm font-semibold text-slate-700 mb-1">จังหวัด</label>
+                <div class="relative">
+                    <i class="fa-solid fa-map-location-dot absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    <input type="text" id="provinceDisplay" disabled class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed">
+                </div>
+            </div>
+
+            <!-- Institution (Readonly) -->
+            <div>
+                <label for="institutionDisplay" class="block text-sm font-semibold text-slate-700 mb-1">สถาบัน / สถานศึกษา</label>
+                <div class="relative">
+                    <i class="fa-solid fa-school absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    <input type="text" id="institutionDisplay" disabled class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-4 space-y-3">
+                <button type="button" onclick="openEditModal()" class="w-full py-3.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm shadow-lg shadow-amber-600/20 transition-all hover:scale-[1.01] flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูล
+                </button>
+                <button type="submit" id="saveBtn" class="w-full py-3.5 rounded-xl bg-blue-900 hover:bg-blue-950 text-white font-semibold text-sm shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.01] flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> บันทึกรูปโปรไฟล์
+                </button>
+                <div class="flex items-center justify-between px-1 pt-1">
+                    <a href="index.html" class="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors">
+                        <i class="fa-solid fa-arrow-left"></i> ย้อนกลับ
+                    </a>
+                    <button type="button" onclick="openDeleteModal()" class="text-rose-600 hover:text-rose-700 font-semibold text-sm transition-colors underline underline-offset-4 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-xmark"></i> ลบบัญชี?
+                    </button>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- JavaScript Handling -->
+    <script>
+        const BACKEND_URL = "https://script.google.com/macros/s/AKfycbyBHU2Aw_fpj0K6RhjcH7DIIwwtJIr3Bb1QQW3aUUjM9qMapXMUKvh6KkZhfvoIUXOg/exec";
+        let userRole = ""; 
+        let base64Avatar = "";
+        let userEmailOrCode = "";
+        let schoolDataByProvince = {}; 
+        let subMode = ""; 
+        let verifiedPass = "";
+        let deleteEmailInput = "";
+        let deletePassInput = "";
+
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('pageLoadingOverlay');
+            if (overlay) {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        // ทำงานทันทีตั้งแต่โหลดสคริปต์ ไม่ต้องรอ DOMContentLoaded เพื่อความเร็วสูงสุด
+        (function initProfileImmediately() {
+            const loggedInTeacher = sessionStorage.getItem('loggedInTeacher') || localStorage.getItem('savedTeacherProfile');
+            const loggedInUser = sessionStorage.getItem('loggedInUser') || localStorage.getItem('savedUserProfile');
+
+            let tempSessionData = null;
+            if (loggedInTeacher) {
+                userRole = "teacher";
+                try { tempSessionData = JSON.parse(loggedInTeacher); } catch(e){}
+            } else if (loggedInUser) {
+                userRole = "student";
+                try { tempSessionData = JSON.parse(loggedInUser); } catch(e){}
+            }
+
+            if (tempSessionData) {
+                userEmailOrCode = tempSessionData.email || tempSessionData.username || tempSessionData.studentCode || tempSessionData.userCode || "";
+                fallbackLoadSession(tempSessionData);
+            }
+        })();
+
+        async function loadCurrentProfile() {
+            const loggedInTeacher = sessionStorage.getItem('loggedInTeacher') || localStorage.getItem('savedTeacherProfile');
+            const loggedInUser = sessionStorage.getItem('loggedInUser') || localStorage.getItem('savedUserProfile');
+
+            let tempSessionData = null;
+            if (loggedInTeacher) {
+                userRole = "teacher";
+                tempSessionData = JSON.parse(loggedInTeacher);
+            } else if (loggedInUser) {
+                userRole = "student";
+                tempSessionData = JSON.parse(loggedInUser);
+            } else {
+                hideLoadingOverlay();
+                document.getElementById('authAlert').classList.remove('hidden');
+                document.getElementById('settingsContainer').classList.add('hidden');
+                return;
+            }
+
+            userEmailOrCode = tempSessionData.email || tempSessionData.username || tempSessionData.studentCode || "";
+
+            fallbackLoadSession(tempSessionData);
+            
+            try {
+                await Promise.all([
+                    fetchLatestProfileData(userEmailOrCode),
+                    fetchSchoolData()
+                ]);
+            } catch(e) {
+                console.warn(e);
+            } finally {
+                hideLoadingOverlay();
+            }
+        }
+
+        async function fetchSchoolData() {
+            try {
+                const response = await fetch(`${BACKEND_URL}?action=get_schools`);
+                const result = await response.json();
+                if (result.status === 'success' && result.schools) {
+                    schoolDataByProvince = {};
+                    result.schools.forEach(item => {
+                        if (!schoolDataByProvince[item.province]) {
+                            schoolDataByProvince[item.province] = [];
+                        }
+                        if (item.schoolName && !schoolDataByProvince[item.province].includes(item.schoolName)) {
+                            schoolDataByProvince[item.province].push(item.schoolName);
+                        }
+                    });
+                    populateProvinceDatalist();
+                }
+            } catch (err) {
+                console.warn("ไม่สามารถโหลดข้อมูลโรงเรียนได้:", err);
+            }
+        }
+
+        function populateProvinceDatalist() {
+            const provinceList = document.getElementById('provinceOptions');
+            if (!provinceList) return;
+            provinceList.innerHTML = '';
+            Object.keys(schoolDataByProvince).forEach(province => {
+                const option = document.createElement('option');
+                option.value = province;
+                provinceList.appendChild(option);
+            });
+        }
+
+        function onProvinceChange() {
+            const selectedProvince = document.getElementById('editProvinceDisplay').value.trim();
+            const instList = document.getElementById('institutionOptions');
+            if (!instList) return;
+            instList.innerHTML = '';
+            if (schoolDataByProvince[selectedProvince]) {
+                schoolDataByProvince[selectedProvince].forEach(school => {
+                    const option = document.createElement('option');
+                    option.value = school;
+                    instList.appendChild(option);
+                });
+            }
+        }
+
+        async function fetchLatestProfileData(identifier) {
+            try {
+                const response = await fetch(`${BACKEND_URL}?action=get_user_profile&role=${userRole}&identifier=${encodeURIComponent(identifier)}`);
+                const result = await response.json();
+
+                if (result.status === 'success' && result.user) {
+                    const data = result.user;
+                    const classContainer = document.getElementById('classFieldContainer');
+                    const deptContainer = document.getElementById('deptFieldContainer');
+                    const studentCodeContainer = document.getElementById('studentCodeContainer');
+
+                    if (data.firstname) document.getElementById('firstname').value = data.firstname;
+                    if (data.lastname) document.getElementById('lastname').value = data.lastname;
+                    if (data.studentCode || data.userCode) document.getElementById('userCodeDisplay').value = data.studentCode || data.userCode;
+                    if (data.email) document.getElementById('userEmailDisplay').value = data.email;
+                    if (data.province) document.getElementById('provinceDisplay').value = data.province;
+                    if (data.institution) document.getElementById('institutionDisplay').value = data.institution;
+
+                    if (userRole === "teacher") {
+                        document.getElementById('roleBadge').innerText = "สถานะ: อาจารย์ / ครูผู้สอน";
+                        if (classContainer) classContainer.classList.add('hidden');
+                        if (deptContainer) deptContainer.classList.add('hidden');
+                        if (studentCodeContainer) studentCodeContainer.classList.add('hidden');
+                    } else {
+                        document.getElementById('roleBadge').innerText = "สถานะ: นักเรียน / นักศึกษา";
+                        if (data.studentLevel) document.getElementById('userClass').value = data.studentLevel;
+                        if (data.department) document.getElementById('userDept').value = data.department;
+                        if (classContainer) classContainer.classList.remove('hidden');
+                        if (deptContainer) deptContainer.classList.remove('hidden');
+                        if (studentCodeContainer) studentCodeContainer.classList.remove('hidden');
+                    }
+
+                    if (data.avatar) {
+                        document.getElementById('avatarPreview').src = data.avatar;
+                        base64Avatar = data.avatar;
+                    }
+                }
+            } catch (err) {
+                console.warn("ไม่สามารถซิงค์ข้อมูลเรียลไทม์เบื้องหลังได้:", err);
+            }
+        }
+
+        function fallbackLoadSession(data) {
+            const classContainer = document.getElementById('classFieldContainer');
+            const deptContainer = document.getElementById('deptFieldContainer');
+            const studentCodeContainer = document.getElementById('studentCodeContainer');
+
+            const firstName = data.firstname || data.firstName || (data.fullName ? data.fullName.split(' ')[0] : '') || (data.name ? data.name.split(' ')[0] : '');
+            const lastName = data.lastname || data.lastName || (data.fullName ? data.fullName.split(' ').slice(1).join(' ') : '') || (data.name ? data.name.split(' ').slice(1).join(' ') : '');
+
+            document.getElementById('firstname').value = firstName || "";
+            document.getElementById('lastname').value = lastName || "";
+
+            if (userRole === "teacher") {
+                document.getElementById('userCodeDisplay').value = data.username || data.userCode || data.teacherCode || "";
+                document.getElementById('userEmailDisplay').value = data.email || data.username || "";
+                document.getElementById('provinceDisplay').value = data.province || data.Province || "";
+                document.getElementById('institutionDisplay').value = data.institution || data.Institution || "";
+                document.getElementById('roleBadge').innerText = "สถานะ: อาจารย์ / ครูผู้สอน";
+                if (classContainer) classContainer.classList.add('hidden');
+                if (deptContainer) deptContainer.classList.add('hidden');
+                if (studentCodeContainer) studentCodeContainer.classList.add('hidden');
+            } else {
+                document.getElementById('userCodeDisplay').value = data.studentCode || data.userCode || data.username || "";
+                document.getElementById('userEmailDisplay').value = data.email || "";
+                document.getElementById('userClass').value = data.className || data.level || data.studentLevel || data.class || "";
+                document.getElementById('userDept').value = data.department || data.dept || "";
+                document.getElementById('provinceDisplay').value = data.province || data.Province || "";
+                document.getElementById('institutionDisplay').value = data.institution || data.Institution || "";
+                document.getElementById('roleBadge').innerText = "สถานะ: นักเรียน / นักศึกษา";
+                if (classContainer) classContainer.classList.remove('hidden');
+                if (deptContainer) classContainer.classList.remove('hidden');
+                if (studentCodeContainer) studentCodeContainer.classList.remove('hidden');
+            }
+
+            if (data.avatar) {
+                document.getElementById('avatarPreview').src = data.avatar;
+                base64Avatar = data.avatar;
+            }
+        }
+
+        function previewSelectedImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const img = new Image();
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const maxWidth = 250;
+                        const maxHeight = 250;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height *= maxWidth / width;
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width *= maxHeight / height;
+                                height = maxHeight;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        base64Avatar = canvas.toDataURL('image/jpeg', 0.85);
+                        document.getElementById('avatarPreview').src = base64Avatar;
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function openEditModal() {
+            document.getElementById('editUserClass').value = document.getElementById('userClass').value;
+            document.getElementById('editUserDept').value = document.getElementById('userDept').value;
+            document.getElementById('editProvinceDisplay').value = document.getElementById('provinceDisplay').value;
+            onProvinceChange();
+            document.getElementById('editInstitutionDisplay').value = document.getElementById('institutionDisplay').value;
+            document.getElementById('modalEmailDisplay').value = document.getElementById('userEmailDisplay').value;
+
+            const modalClassContainer = document.getElementById('modalClassContainer');
+            const modalDeptContainer = document.getElementById('modalDeptContainer');
+            if (userRole === "teacher") {
+                if (modalClassContainer) modalClassContainer.classList.add('hidden');
+                if (modalDeptContainer) modalDeptContainer.classList.add('hidden');
+            } else {
+                if (modalClassContainer) modalClassContainer.classList.remove('hidden');
+                if (modalDeptContainer) modalDeptContainer.classList.remove('hidden');
+            }
+
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function openSecureSubModal(mode) {
+            subMode = mode;
+            document.getElementById('subCurrentPassword').value = '';
+            document.getElementById('subNewEmail').value = '';
+            document.getElementById('subNewPass1').value = '';
+            document.getElementById('subNewPass2').value = '';
+
+            document.getElementById('subStep1').classList.remove('hidden');
+            document.getElementById('subStep2').classList.add('hidden');
+            document.getElementById('subEmailContainer').classList.add('hidden');
+            document.getElementById('subPasswordContainer').classList.add('hidden');
+
+            const title = document.getElementById('secureSubTitle');
+            if (mode === 'email') {
+                title.innerText = "เปลี่ยนอีเมล (Gmail)";
+                document.getElementById('subStep1Desc').innerText = "กรุณากรอกรหัสผ่านบัญชีของคุณเพื่อยืนยัน";
+            } else {
+                title.innerText = "เปลี่ยนรหัสผ่าน";
+                document.getElementById('subStep1Desc').innerText = "กรุณากรอกรหัสผ่านปัจจุบันของคุณ";
+            }
+
+            document.getElementById('secureSubModal').classList.remove('hidden');
+        }
+
+        function closeSecureSubModal() {
+            document.getElementById('secureSubModal').classList.add('hidden');
+        }
+
+        /* ------------------ ฟังก์ชันระบบลบบัญชีผู้ใช้ ------------------ */
+        function openDeleteModal() {
+            document.getElementById('delInputEmail').value = '';
+            document.getElementById('delInputPassword').value = '';
+            document.getElementById('delStep1').classList.remove('hidden');
+            document.getElementById('delStep2').classList.add('hidden');
+            document.getElementById('delStep3').classList.add('hidden');
+            document.getElementById('delStep4').classList.add('hidden');
+            document.getElementById('delSpinnerContainer').classList.remove('hidden');
+            document.getElementById('delSuccessContainer').classList.add('hidden');
+            document.getElementById('deleteAccountModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteAccountModal').classList.add('hidden');
+        }
+
+        function nextDeleteStep1() {
+            const inputEmail = document.getElementById('delInputEmail').value.trim().toLowerCase();
+            const currentEmail = document.getElementById('userEmailDisplay').value.trim().toLowerCase();
+
+            if (!inputEmail) {
+                alert("กรุณากรอกอีเมล (Gmail)");
+                return;
+            }
+            if (inputEmail !== currentEmail) {
+                alert("อีเมลที่คุณกรอกไม่ตรงกับอีเมลของบัญชีผู้ใช้นี้");
+                return;
+            }
+
+            deleteEmailInput = inputEmail;
+            document.getElementById('delStep1').classList.add('hidden');
+            document.getElementById('delStep2').classList.remove('hidden');
+        }
+
+        async function nextDeleteStep2() {
+            const pass = document.getElementById('delInputPassword').value.trim();
+            if (!pass) {
+                alert("กรุณากรอกรหัสผ่าน");
+                return;
+            }
+
+            try {
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'login',
+                        role: userRole,
+                        email: deleteEmailInput,
+                        password: pass
+                    })
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    deletePassInput = pass;
+                    document.getElementById('delStep2').classList.add('hidden');
+                    document.getElementById('delStep3').classList.remove('hidden');
+                } else {
+                    alert("รหัสผ่านไม่ถูกต้อง");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("เกิดข้อผิดพลาดในการตรวจสอบรหัสผ่าน");
+            }
+        }
+
+        async function confirmDeleteAccount() {
+            document.getElementById('delStep3').classList.add('hidden');
+            document.getElementById('delStep4').classList.remove('hidden');
+
+            try {
+                await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'delete_account',
+                        role: userRole,
+                        email: deleteEmailInput,
+                        password: deletePassInput
+                    })
+                });
+
+                setTimeout(() => {
+                    document.getElementById('delSpinnerContainer').classList.add('hidden');
+                    document.getElementById('delSuccessContainer').classList.remove('hidden');
+                    document.getElementById('delSuccessContainer').classList.add('flex');
+
+                    sessionStorage.clear();
+                    localStorage.clear();
+
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1800);
+                }, 1500);
+
+            } catch (err) {
+                console.error(err);
+                alert("เกิดข้อผิดพลาดในการลบบัญชี");
+                closeDeleteModal();
+            }
+        }
+
+        async function verifySubPassword() {
+            const pass = document.getElementById('subCurrentPassword').value.trim();
+            if (!pass) {
+                alert("กรุณากรอกรหัสผ่าน");
+                return;
+            }
+
+            const currentEmail = document.getElementById('userEmailDisplay').value.trim();
+            try {
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'login',
+                        role: userRole,
+                        email: currentEmail,
+                        password: pass
+                    })
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    verifiedPass = pass;
+                    document.getElementById('subStep1').classList.add('hidden');
+                    document.getElementById('subStep2').classList.remove('hidden');
+
+                    if (subMode === 'email') {
+                        document.getElementById('subEmailContainer').classList.remove('hidden');
+                    } else {
+                        document.getElementById('subPasswordContainer').classList.remove('hidden');
+                    }
+                } else {
+                    alert("รหัสผ่านไม่ถูกต้อง");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("เกิดข้อผิดพลาดในการตรวจสอบรหัสผ่าน");
+            }
+        }
+
+        async function submitSecureChange() {
+            let payload = {
+                action: 'update_profile',
+                role: userRole,
+                email: userEmailOrCode,
+                userCode: userEmailOrCode,
+                currentPassword: verifiedPass
+            };
+
+            if (subMode === 'email') {
+                const newEmail = document.getElementById('subNewEmail').value.trim();
+                if (!newEmail || !newEmail.includes('@')) {
+                    alert("กรุณากรอกอีเมลใหม่ให้ถูกต้อง");
+                    return;
+                }
+                payload.type = 'change_email';
+                payload.newEmail = newEmail;
+            } else {
+                const p1 = document.getElementById('subNewPass1').value.trim();
+                const p2 = document.getElementById('subNewPass2').value.trim();
+                if (!p1 || p1.length < 6) {
+                    alert("รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร");
+                    return;
+                }
+                if (p1 !== p2) {
+                    alert("รหัสผ่านใหม่ทั้ง 2 ครั้งไม่ตรงกัน");
+                    return;
+                }
+                payload.type = 'change_password';
+                payload.newPassword = p1;
+            }
+
+            try {
+                await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                closeSecureSubModal();
+                closeEditModal();
+                alert(subMode === 'email' ? "เปลี่ยนเมลสำเร็จแล้ว!" : "เปลี่ยนรหัสผ่านสำเร็จแล้ว!");
+                location.reload();
+            } catch (err) {
+                console.error(err);
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+            }
+        }
+
+        async function submitModalEdit(e) {
+            e.preventDefault();
+            const confirmBtn = document.getElementById('confirmSaveEditBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+
+            const firstname = document.getElementById('firstname').value.trim();
+            const lastname = document.getElementById('lastname').value.trim();
+            const newClass = userRole === "teacher" ? "" : document.getElementById('editUserClass').value.trim();
+            const newDept = userRole === "teacher" ? "" : document.getElementById('editUserDept').value.trim();
+            const newProvince = document.getElementById('editProvinceDisplay').value.trim();
+            const newInstitution = document.getElementById('editInstitutionDisplay').value.trim();
+
+            const payload = {
+                action: 'update_profile',
+                role: userRole,
+                email: userEmailOrCode,
+                userCode: userEmailOrCode,
+                firstname: firstname,
+                lastname: lastname,
+                studentLevel: newClass,
+                department: newDept,
+                province: newProvince,
+                institution: newInstitution,
+                avatar: base64Avatar
+            };
+
+            try {
+                await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                closeEditModal();
+                alert("อัปเดตข้อมูลเรียบร้อยแล้วค่ะ!");
+                location.reload();
+            } catch (error) {
+                console.error("Save Error:", error);
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อระบบหลังบ้าน");
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = 'บันทึกการแก้ไข';
+            }
+        }
+
+        async function handleSaveProfile(e) {
+            e.preventDefault();
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึกรูปโปรไฟล์...';
+
+            const firstname = document.getElementById('firstname').value.trim();
+            const lastname = document.getElementById('lastname').value.trim();
+            const userClassElem = document.getElementById('userClass');
+            const userDeptElem = document.getElementById('userDept');
+            const currentClass = userClassElem ? userClassElem.value.trim() : "";
+            const currentDept = userDeptElem ? userDeptElem.value.trim() : "";
+            const currentProvince = document.getElementById('provinceDisplay').value.trim();
+            const currentInstitution = document.getElementById('institutionDisplay').value.trim();
+
+            const payload = {
+                action: 'update_profile',
+                role: userRole,
+                email: userEmailOrCode,
+                userCode: userEmailOrCode,
+                firstname: firstname,
+                lastname: lastname,
+                studentLevel: currentClass,
+                department: currentDept,
+                province: currentProvince,
+                institution: currentInstitution,
+                avatar: base64Avatar
+            };
+
+            try {
+                await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (userRole === "teacher") {
+                    const loggedInTeacher = JSON.parse(sessionStorage.getItem('loggedInTeacher') || localStorage.getItem('savedTeacherProfile') || '{}');
+                    if (base64Avatar) loggedInTeacher.avatar = base64Avatar;
+                    sessionStorage.setItem('loggedInTeacher', JSON.stringify(loggedInTeacher));
+                    localStorage.setItem('savedTeacherProfile', JSON.stringify(loggedInTeacher));
+                } else {
+                    const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser') || localStorage.getItem('savedUserProfile') || '{}');
+                    if (base64Avatar) loggedInUser.avatar = base64Avatar;
+                    sessionStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                    localStorage.setItem('savedUserProfile', JSON.stringify(loggedInUser));
+                }
+
+                localStorage.setItem('autoOpenSidebar', 'true');
+                alert("อัปเดตรูปโปรไฟล์เรียบร้อยแล้วค่ะ!");
+                window.location.href = 'index.html';
+
+            } catch (error) {
+                console.error("Save Error:", error);
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อระบบหลังบ้าน");
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> บันทึกรูปโปรไฟล์';
+            }
+        }
+
+        // โหลดข้อมูลหลักทันทีเมื่อ DOM พร้อม
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadCurrentProfile);
+        } else {
+            loadCurrentProfile();
+        }
+    </script>
+</body>
+</html>
